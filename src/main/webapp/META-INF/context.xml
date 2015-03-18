@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context>
+  <Resource auth="Container"
+            name="jdbc/datcm"
+            type="javax.sql.DataSource"
+            driverClassName="ca.datacom.jdbc.DatacomJdbcDriver"
+            url="jdbc:datacom://usilca32:8617/ServerName=DBDVMJ_SV"
+            validationQuery="select * from sysadm.orders"
+            factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
+            maxActive="10"
+            maxIdle="4"/>
+</Context>
+
