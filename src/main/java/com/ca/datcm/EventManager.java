@@ -74,7 +74,8 @@ public class EventManager {
   }
 
   private List listVisions() {
-    Session session = HibernateUtil.getDcmSessionFactory().getCurrentSession();
+/*    Session session = HibernateUtil.getDcmSessionFactory().getCurrentSession();*/
+    Session session = HibernateUtil.getPropSessionFactory().getCurrentSession();
     session.beginTransaction();
     List result = session.createQuery("from Vision").list();
     session.getTransaction().commit();
