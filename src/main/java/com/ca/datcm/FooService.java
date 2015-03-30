@@ -2,13 +2,17 @@ package com.ca.datcm;
 
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.Enumeration;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.core.UriInfo;
 import java.util.ArrayList;
 import java.util.Collection;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.POST;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.Path;
@@ -25,17 +29,73 @@ import org.jboss.resteasy.links.AddLinks;
 import org.jboss.resteasy.links.LinkResource;
 import java.net.URI;
 
-@Path("/foo")
+@Path("/")
 public class FooService {
   private static Map<String, Programmer> hackers = new HashMap<String, Programmer>();
   private Map<String, Server> servers = new ConcurrentHashMap<String, Server>();
+  private ConcurrentHashMap<Integer, String> serverURIs = new ConcurrentHashMap<Integer, String>();
+  private AtomicInteger dbservIds = new AtomicInteger();
   private AtomicInteger serverIds = new AtomicInteger();
+  private CollectionPlusJSON baseObj = new CollectionPlusJSON();
+  private static final String baseURI = "http://10.130.255.16/api/mufs";
 
   static {
     Programmer dennis = Programmer.make("1", "Dennis Richie", new String[] {"c", "assembler" });
     hackers.put(dennis.getId(), dennis);
     Programmer richard = Programmer.make("2", "Richard Stallman", new String[] {"c", "java", "ruby" });
     hackers.put(richard.getId(), richard);
+  }
+
+  public FooService() {
+    baseObj.getTlo().setHref(baseURI);
+    baseObj.getTlo().addLink(new Link("queries", baseURI + "/queries"));
+    baseObj.getTlo().addLink(new Link("template", baseURI + "/template")); 
+  }
+
+  @GET
+  @Produces("application/vnd.collection+json")
+  @Path("/mufs")
+  public CollectionPlusJSON getMUFs() {
+    TopLevelObject tlo = baseObj.getTlo();
+    if (tlo.getItems() != null) tlo.getItems().clear();
+    tlo.setTemplate(null);
+    Integer key;
+    for (Enumeration<Integer> e = serverURIs.keys(); e.hasMoreElements(); ) { 
+      Item i = new Item(); 
+      key = e.nextElement();
+      i.setHref(baseURI + "/" + key.toString());
+      i.addDatum(new Datum("Server URI", serverURIs.get(key)));
+      tlo.addItem(i); 
+    } 
+    return baseObj;
+  }
+
+  @GET
+  @Produces("application/vnd.collection+json")
+  @Path("/mufs/template")
+  public CollectionPlusJSON getTemplate() {
+    TopLevelObject tlo = baseObj.getTlo();
+    if (tlo.getItems() != null) tlo.getItems().clear();
+    Template t = new Template();
+    t.addDatum(new Datum("URI of a CA Datacom Server connected to the MUF", 
+                         "Server URI",
+                         "http://example.org:9090/ServerName=MYDBSRV")); 
+    tlo.setTemplate(t);
+    return baseObj;
+  }
+
+  @POST
+  @Path("/mufs")
+  @Consumes("application/json")
+  public Response addMUF(TopLevelObject tlo) {
+    int nextId = dbservIds.incrementAndGet();
+    for (Datum d : tlo.getTemplate().getData()) {
+      if ("Server URI".equals(d.getName())) {
+        serverURIs.put(nextId, d.getValue());
+        break;
+      } 
+    }
+    return Response.created(URI.create(baseURI + "/" + nextId)).build();
   }
 
   @LinkResource(value = Server.class)
