@@ -8,6 +8,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.MediaType;
 import java.util.ArrayList;
 import java.util.Collection;
 import javax.ws.rs.Consumes;
@@ -28,13 +29,14 @@ import org.hibernate.cfg.Configuration;
 import org.jboss.resteasy.links.AddLinks;
 import org.jboss.resteasy.links.LinkResource;
 import java.net.URI;
+import org.hibernate.HibernateException;
 
 @Path("/")
 public class FooService {
   private static Map<String, Programmer> hackers = new HashMap<String, Programmer>();
   private Map<String, Server> servers = new ConcurrentHashMap<String, Server>();
-  private ConcurrentHashMap<Integer, String> serverURIs = new ConcurrentHashMap<Integer, String>();
-  private AtomicInteger dbservIds = new AtomicInteger();
+  private ConcurrentHashMap<Integer, MUF> mufs = new ConcurrentHashMap<Integer, MUF>();
+  private AtomicInteger mufIds = new AtomicInteger();
   private AtomicInteger serverIds = new AtomicInteger();
   private CollectionPlusJSON baseObj = new CollectionPlusJSON();
   private static final String baseURI = "http://10.130.255.16/api/mufs";
@@ -59,12 +61,15 @@ public class FooService {
     TopLevelObject tlo = baseObj.getTlo();
     if (tlo.getItems() != null) tlo.getItems().clear();
     tlo.setTemplate(null);
+    tlo.setError(null);
     Integer key;
-    for (Enumeration<Integer> e = serverURIs.keys(); e.hasMoreElements(); ) { 
-      Item i = new Item(); 
+    for (Enumeration<Integer> e = mufs.keys(); e.hasMoreElements(); ) { 
       key = e.nextElement();
+      Item i = mufs.get(key).asItem();
+
       i.setHref(baseURI + "/" + key.toString());
-      i.addDatum(new Datum("Server URI", serverURIs.get(key)));
+      i.addDatum(new Datum("MUF_ACTIVE_TASKS", baseURI + "/" + key.toString() + "/MFQ"));
+
       tlo.addItem(i); 
     } 
     return baseObj;
@@ -75,11 +80,12 @@ public class FooService {
   @Path("/mufs/template")
   public CollectionPlusJSON getTemplate() {
     TopLevelObject tlo = baseObj.getTlo();
-    if (tlo.getItems() != null) tlo.getItems().clear();
+    tlo.setItems(null);
+    tlo.setError(null);
     Template t = new Template();
-    t.addDatum(new Datum("URI of a CA Datacom Server connected to the MUF", 
-                         "Server URI",
-                         "http://example.org:9090/ServerName=MYDBSRV")); 
+    t.addDatum(new Datum("Connection URL for a CA Datacom Server connected to the MUF", 
+                         "DBSERV URL",
+                         "jdbc:datacom://example.org:9090/ServerName=MYDBSRV")); 
     tlo.setTemplate(t);
     return baseObj;
   }
@@ -88,14 +94,25 @@ public class FooService {
   @Path("/mufs")
   @Consumes("application/json")
   public Response addMUF(TopLevelObject tlo) {
-    int nextId = dbservIds.incrementAndGet();
+    int nextId = 0;
     for (Datum d : tlo.getTemplate().getData()) {
-      if ("Server URI".equals(d.getName())) {
-        serverURIs.put(nextId, d.getValue());
-        break;
+      if ("DBSERV URL".equals(d.getName())) {
+        try { 
+          MUF muf = MUF.make(d.getValue());
+          nextId = mufIds.incrementAndGet();
+          mufs.put(nextId, muf);
+          break;
+        } catch (HibernateException e) {
+          TopLevelObject ourTlo = baseObj.getTlo();
+          ourTlo.setItems(null);
+          ourTlo.setTemplate(null);
+          ourTlo.setError(new Error("Unable to connect to specified DBSERV", "400", e.getMessage()));         
+          return Response.status(Response.Status.BAD_REQUEST)
+                         .entity(baseObj).type(new MediaType("application", "vnd.collection+json")).build();
+        }
       } 
     }
-    return Response.created(URI.create(baseURI + "/" + nextId)).build();
+    return Response.created(URI.create(baseURI + "/" + Integer.toString(nextId))).build();
   }
 
   @LinkResource(value = Server.class)

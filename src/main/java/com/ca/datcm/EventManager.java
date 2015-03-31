@@ -25,9 +25,18 @@ public class EventManager {
         System.out.print(" " + theVision.getS());
       }
       System.out.println(" ");
+    } else {
+      List tasks = mgr.listTasks();
+      for (int i = 0; i < tasks.size(); i++) { 
+        MFQ task = (MFQ)tasks.get(i);
+        System.out.println(task.getCurrentStatus());
+      }
     }
 
     HibernateUtil.getSessionFactory().close();
+    HibernateUtil.getFactory().close();
+    HibernateUtil.getDcmSessionFactory().close();
+    HibernateUtil.getPropSessionFactory().close();
   }
 
   private void createAndStoreEvent(String title, Date theDate) {
@@ -81,6 +90,14 @@ public class EventManager {
     session.getTransaction().commit();
     return result;
   } 
+  
+  private List listTasks() {
+    Session session = HibernateUtil.getFactory().getCurrentSession();
+    session.beginTransaction(); 
+    List result = session.createQuery("from MFQ").list();
+    session.getTransaction().commit();
+    return result;
+  }
 
   private List listEvents() {
     Session session = HibernateUtil.getSessionFactory().getCurrentSession();
