@@ -1,108 +1,74 @@
 package com.ca.datcm;
 
 import org.hibernate.Session;
-
 import java.util.*;
-
 import com.ca.datcm.Event;
 import com.ca.datcm.util.HibernateUtil;
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.SQLWarning;
+import java.sql.Statement;
+import org.apache.tomcat.jdbc.pool.DataSourceFactory;
 
 public class EventManager {
-  public static void main(String[] args) {
+  public static void main(String[] args) throws Exception, SQLException {
     EventManager mgr = new EventManager();
-    if (args[0].equals("store")) {
-      mgr.createAndStoreEvent("My Event", new Date());
-    } else if (args[0].equals("list")) {
-      List events = mgr.listEvents();
-      for (int i = 0; i < events.size(); i++) {
-        Event theEvent = (Event)events.get(i);
-        System.out.println("Event: " + theEvent.getTitle() + " Time: " + theEvent.getDate());
-      }
-    } else if (args[0].equals("double")) {
-      List visions = mgr.listVisions();
-      for (int i = 0; i < visions.size(); i++) {
-        Vision theVision = (Vision)visions.get(i);
-        System.out.print(" " + theVision.getS());
-      }
-      System.out.println(" ");
-    } else {
-      List tasks = mgr.listTasks();
-      for (int i = 0; i < tasks.size(); i++) { 
-        MFQ task = (MFQ)tasks.get(i);
-        System.out.println(task.getCurrentStatus());
-      }
+/*    List tasks = mgr.listTasks();
+    for (int i = 0; i < tasks.size(); i++) { 
+      Task task = (Task)tasks.get(i);
+      System.out.println(task.getCurrentStatus());
     }
 
-    HibernateUtil.getSessionFactory().close();
-    HibernateUtil.getFactory().close();
-    HibernateUtil.getDcmSessionFactory().close();
-    HibernateUtil.getPropSessionFactory().close();
+    HibernateUtil.getFactory().close(); */
+
+    DataSourceFactory dsf = new DataSourceFactory();
+    Properties p = new Properties();
+    p.setProperty("driverClassName", "ca.datacom.jdbc.DatacomJdbcDriver");
+    p.setProperty("url", "jdbc:datacom://usilca32:8617/ServerName=DBDVMJ_SV");
+    DataSource ds = dsf.createDataSource(p);
+    Connection con = ds.getConnection();
+    Statement s = con.createStatement();
+    String query = "SELECT BUFFER_REFERENCES, CPU_TIME, CURRENT_STATUS, " 
+                      + "DB_COMMAND, DBID, DURATION, EOJ_OK, JOB_NAME, LOCK_VALUE, "
+                      + "MUF_NAME, MUFPLEX_OWNER, OPTIONAL_ID, OWNER_TASK, PHYSICAL_EXCPS, "
+                      + "REQUEST_SEQ_NO, RUN_TIME, RUN_UNIT, TABLE_NAME, TASK_NUMBER, "
+                      + "TRN_SEQ_NO, TSN_DURATION FROM SYSADM.MUF_ACTIVE_TASKS;"; 
+    ResultSet rs = s.executeQuery(query);
+    while (rs.next()) {
+      System.out.println("ROW BEGIN ----------------------------");
+      System.out.println("\tBUFFER_REFERENCES: |" + rs.getInt(1) + "|");
+      System.out.println("\tCPU_TIME: |" + rs.getString(2) + "|");
+      System.out.println("\tCURRENT_STATUS: |" + rs.getString(3) + "|");
+      System.out.println("\tDB_COMMAND: |" + rs.getString(4) + "|");
+      System.out.println("\tDBID: |" + rs.getInt(5) + "|");
+      System.out.println("\tDURATION: |" + rs.getString(6) + "|");
+      System.out.println("\tEOJ_OK: |" + rs.getString(7) + "|");
+      System.out.println("\tJOB_NAME: |" + rs.getString(8) + "|");
+      System.out.println("\tLOCK_VALUE: |" + rs.getString(9) + "|");
+      System.out.println("\tMUF_NAME: |" + rs.getString(10) + "|");
+      System.out.println("\tMUFPLEX_OWNER: |" + rs.getString(11) + "|");
+      System.out.println("\tOPTIONAL_ID: |" + rs.getString(12) + "|");
+      System.out.println("\tOWNER_TASK: |" + rs.getInt(13) + "|");
+      System.out.println("\tPHYSICAL_EXCPS: |" + rs.getInt(14) + "|");
+      System.out.println("\tREQUEST_SEQ_NO: |" + rs.getInt(15) + "|");
+      System.out.println("\tRUN_TIME: |" + rs.getString(16) + "|");
+      System.out.println("\tRUN_UNIT: |" + rs.getInt(17) + "|");
+      System.out.println("\tTABLE_NAME: |" + rs.getString(18) + "|");
+      System.out.println("\tTASK_NUMBER: |" + rs.getInt(19) + "|");
+      System.out.println("\tTRN_SEQ_NO: |" + rs.getString(20) + "|");
+      System.out.println("\tTSN_DURATION: |" + rs.getString(21) + "|");
+      System.out.println("-----------------------------------");
+    } 
+    rs.close(); 
+    con.close();
   }
 
-  private void createAndStoreEvent(String title, Date theDate) {
-    Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-    session.beginTransaction();
-
-    Event theEvent = new Event();
-    theEvent.setTitle(title);
-    theEvent.setDate(theDate);
-    session.save(theEvent);
-
-    session.getTransaction().commit();
-  }
-
-  private void addPersonToEvent(Long personId, Long eventId) {
-    Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-    session.beginTransaction();
-    Person aPerson = (Person)session.load(Person.class, personId);
-    /* OR..."eager fetch" the collection so we can use it detached.(!?) 
-       Person aPerson = (Person) session
-              .createQuery("select p from Person p left join fetch p.events where p.id = :pid")
-              .setParameters("pid", personId)
-              .uniqueResult(); 
-       Event anEvent = (Event) session.load(Event.class, eventId);
-       session.getTransaction().commit();
-       aPerson.getEvents().add(anEvent);    // NOTE: aPerson (and its collection) is detached!
-       Session session2 = HibernateUtil.getSessionFactory().getCurrentSession(); 
-       session2.beginTransaction();
-       session2.update(aPerson); // NOTE: reattachment of aPerson(!!)
-       session2.getTransaction().commit(); */
-    Event anEvent = (Event)session.load(Event.class, eventId);
-    aPerson.getEvents().add(anEvent);
-    session.getTransaction().commit();
-  }
-
-  private void addEmailToPerson(Long personId, String emailAddress) {
-    Session session = HibernateUtil.getSessionFactory().getCurrentSession(); 
-    session.beginTransaction();
-    
-    Person aPerson = (Person)session.load(Person.class, personId);
-    aPerson.getEmailAddresses().add(emailAddress);
-
-   session.getTransaction().commit();
-  }
-
-  private List listVisions() {
-/*    Session session = HibernateUtil.getDcmSessionFactory().getCurrentSession();*/
-    Session session = HibernateUtil.getPropSessionFactory().getCurrentSession();
-    session.beginTransaction();
-    List result = session.createQuery("from Vision").list();
-    session.getTransaction().commit();
-    return result;
-  } 
-  
   private List listTasks() {
     Session session = HibernateUtil.getFactory().getCurrentSession();
     session.beginTransaction(); 
-    List result = session.createQuery("from MFQ").list();
-    session.getTransaction().commit();
-    return result;
-  }
-
-  private List listEvents() {
-    Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-    session.beginTransaction();
-    List result = session.createQuery("from Event").list();
+    List result = session.createQuery("from Task").list();
     session.getTransaction().commit();
     return result;
   }

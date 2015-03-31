@@ -1,6 +1,6 @@
 package com.ca.datcm;
 
-import java.util.Collection;
+import org.apache.tomcat.jdbc.pool.DataSourceFactory;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Enumeration;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -39,7 +39,8 @@ public class FooService {
   private AtomicInteger mufIds = new AtomicInteger();
   private AtomicInteger serverIds = new AtomicInteger();
   private CollectionPlusJSON baseObj = new CollectionPlusJSON();
-  private static final String baseURI = "http://10.130.255.16/api/mufs";
+  private static final String baseURI = "http://10.130.255.16:8080/hwapp/api/mufs";
+  public static final DataSourceFactory dsf = new DataSourceFactory();
 
   static {
     Programmer dennis = Programmer.make("1", "Dennis Richie", new String[] {"c", "assembler" });
@@ -54,6 +55,14 @@ public class FooService {
     baseObj.getTlo().addLink(new Link("template", baseURI + "/template")); 
   }
 
+  private CollectionPlusJSON getBasicCJSON(String myBaseURI) {
+    CollectionPlusJSON mfq = new CollectionPlusJSON();
+    mfq.getTlo().setHref(myBaseURI);
+    mfq.getTlo().addLink(new Link("queries", myBaseURI + "/queries"));
+    mfq.getTlo().addLink(new Link("template", myBaseURI + "/template"));
+    return mfq;
+  }
+
   @GET
   @Produces("application/vnd.collection+json")
   @Path("/mufs")
@@ -65,14 +74,24 @@ public class FooService {
     Integer key;
     for (Enumeration<Integer> e = mufs.keys(); e.hasMoreElements(); ) { 
       key = e.nextElement();
-      Item i = mufs.get(key).asItem();
-
-      i.setHref(baseURI + "/" + key.toString());
-      i.addDatum(new Datum("MUF_ACTIVE_TASKS", baseURI + "/" + key.toString() + "/MFQ"));
-
+      Item i = mufs.get(key).asItem(baseURI + "/" + key.toString());
       tlo.addItem(i); 
     } 
     return baseObj;
+  }
+
+  @GET
+  @Produces("application/vnd.collection+json")
+  @Path("/mufs/{id}/MFQ")
+  public CollectionPlusJSON getMUFmfq(@PathParam("id") Integer id) {
+    String myBaseURI = baseURI + "/" + id.toString() + "/MFQ";
+    CollectionPlusJSON cjson = getBasicCJSON(myBaseURI);
+    try {
+      cjson.getTlo().setItems(mufs.get(id).serializeMFQ(myBaseURI));
+    } catch (Exception e) {
+      System.out.println("NOPE: " + e.getMessage());
+    }
+    return cjson;
   }
 
   @GET
@@ -102,7 +121,7 @@ public class FooService {
           nextId = mufIds.incrementAndGet();
           mufs.put(nextId, muf);
           break;
-        } catch (HibernateException e) {
+        } catch (Exception e) {
           TopLevelObject ourTlo = baseObj.getTlo();
           ourTlo.setItems(null);
           ourTlo.setTemplate(null);

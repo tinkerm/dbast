@@ -25,6 +25,11 @@
       <version>3.0.9.Final</version>
     </dependency>
     <dependency>
+      <groupId>org.apache.tomcat</groupId>
+      <artifactId>tomcat-jdbc</artifactId>
+      <version>8.0.21</version>
+    </dependency>
+    <dependency>
       <groupId>org.jboss.resteasy</groupId>
       <artifactId>resteasy-jsapi</artifactId>
       <version>3.0.9.Final</version>
