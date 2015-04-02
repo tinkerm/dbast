@@ -2,7 +2,6 @@ package com.ca.datcm;
 
 import org.hibernate.Session;
 import java.util.*;
-import com.ca.datcm.Event;
 import com.ca.datcm.util.HibernateUtil;
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -63,6 +62,8 @@ public class EventManager {
     } 
     rs.close(); 
     con.close();
+    Connection c2 = ds.getConnection();
+    c2.close();
   }
 
   private List listTasks() {

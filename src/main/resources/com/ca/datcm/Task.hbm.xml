@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping package="com.ca.datcm">
+  <class name="Task" table="SYSADM.MUF_ACTIVE_TASKS">
+    <id name="requestSeqNo" column="REQUEST_SEQ_NO">
+      <generator class="native"/>
+    </id>
+    <property name="bufferReferences" type="int" column="BUFFER_REFERENCES"/>
+    <property name="cpuTime" type="string" column="CPU_TIME"/>
+    <property name="currentStatus" type="string" column="CURRENT_STATUS"/>
+    <property name="dbCommand" type="string" column="DB_COMMAND"/>
+    <property name="dbid" type="int" column="DBID"/>
+    <property name="duration" type="string" column="DURATION"/>
+    <property name="eojOk" type="character" column="EOJ_OK"/>
+    <property name="jobName" type="string" column="JOB_NAME"/>
+    <property name="lockValue" type="string" column="LOCK_VALUE"/>
+    <property name="mufName" type="string" column="MUF_NAME"/>
+    <property name="mufplexOwner" type="string" column="MUFPLEX_OWNER"/>
+    <property name="optionalId" type="string" column="OPTIONAL_ID"/>
+    <property name="ownerTask" type="integer" column="OWNER_TASK"/>
+    <property name="physicalExcps" type="integer" column="PHYSICAL_EXCPS"/>
+    <property name="runTime" type="string" column="RUN_TIME"/>
+    <property name="runUnit" type="integer" column="RUN_UNIT"/>
+    <property name="tableName" type="string" column="TABLE_NAME"/>
+    <property name="taskNumber" type="integer" column="TASK_NUMBER"/>
+    <property name="trnSeqNo" type="string" column="TRN_SEQ_NO"/>
+    <property name="tsnDuration" type="string" column="TSN_DURATION"/>
+  </class>
+</hibernate-mapping>

@@ -6,12 +6,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 @ApplicationPath("/api")
-public class FooApplication extends Application {
+public class DBAstApplication extends Application {
   private static Set<Object> singletons = new HashSet<Object>();
   private static Set<Class<?>> sets = new HashSet<Class<?>>();
   
-  public FooApplication() {
-    singletons.add(new FooService());
+  public DBAstApplication() {
+    singletons.add(new DBAstService());
   }
 
   @Override

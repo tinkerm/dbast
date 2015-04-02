@@ -81,6 +81,6 @@
     </dependency>
   </dependencies>
   <build>
-    <finalName>hwapp</finalName>
+    <finalName>DBAst</finalName>
   </build>
 </project>
