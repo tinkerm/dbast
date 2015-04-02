@@ -53,7 +53,7 @@ public class DBAstService {
   @Path("/mufs")
   public CollectionPlusJSON getMUFs(@Context UriInfo uri) {
     String baseUri = uri.getAbsolutePath().toString();
-    CollectionPlusJSON cjson = createCJSON(baseUri, true, true);
+    CollectionPlusJSON cjson = createCJSON(baseUri, false, true);
     Integer id;
 
     for (Enumeration<Integer> e = mufs.keys(); e.hasMoreElements(); ) { 
@@ -83,15 +83,14 @@ public class DBAstService {
   public Response getMUF_MFQ(@PathParam("id") Integer id, 
                              @Context UriInfo uri) {
     String baseUri = uri.getAbsolutePath().toString();
-    CollectionPlusJSON cjson = createCJSON(baseUri, true, true);
+    CollectionPlusJSON cjson = createCJSON(baseUri, true, false);
     MultivaluedMap<String, String> params = uri.getQueryParameters(true); 
     String WHERE = params.getFirst("WHERE");
     String ORDERBY = params.getFirst("ORDERBY");
-    System.out.println("WHERE: " + WHERE);
-    System.out.println("ORDERBY: " + ORDERBY);
+    String COLLIST = params.getFirst("COLLIST"); 
 
     try {
-      cjson.getTlo().setItems(mufs.get(id).serializeMFQ(baseUri));
+      cjson.getTlo().setItems(mufs.get(id).serializeMFQ(baseUri, COLLIST, WHERE, ORDERBY));
     } catch (Exception e) {
       cjson = createCJSON(baseUri, false, false);
       cjson.getTlo().setError(new Error("Unable to connect to DBSERV '" + mufs.get(id).getDbservUrl() + "'", 
@@ -101,6 +100,26 @@ public class DBAstService {
     }
 
     return Response.ok().entity(cjson).build();
+  }
+
+  @GET
+  @Produces("application/vnd.collection+json")
+  @Path("/mufs/{id}/MFQ/queries")
+  public CollectionPlusJSON getMUF_MFQ_Queries(@PathParam("id") Integer id, 
+                                               @Context UriInfo uri) {
+    String baseUri = uri.getBaseUri().toString() + "mufs/" + id.toString() + "/MFQ";
+    CollectionPlusJSON cjson = createCJSON(baseUri, false, false);
+    Query q = new Query();
+
+    q.setHref(baseUri);
+    q.setRel("filter");
+    q.setPrompt("The COLLIST, WHERE, and ORDERBY query parameters are embedded in an SQL query against MFQ");
+    q.addDatum(new Datum("A valid comma-separated list of columns in MFQ", "COLLIST", ""));
+    q.addDatum(new Datum("A valid SQL WHERE clause relative to MFQ", "WHERE", ""));
+    q.addDatum(new Datum("A valid SQL ORDER BY clause relative to MFQ", "ORDERBY", ""));
+    cjson.getTlo().addQuery(q);
+
+    return cjson;
   }
 
   @GET

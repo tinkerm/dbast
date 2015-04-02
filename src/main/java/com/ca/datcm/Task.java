@@ -3,17 +3,17 @@ package com.ca.datcm;
 import java.net.URLEncoder;
 
 public class Task {
-  public int getRequestSeqNo() {
+  public Integer getRequestSeqNo() {
     return requestSeqNo;
   }
-  public void setRequestSeqNo(int requestSeqNo) {
+  public void setRequestSeqNo(Integer requestSeqNo) {
     this.requestSeqNo = requestSeqNo;
   }
  
-  public int getBufferReferences() {
+  public Integer getBufferReferences() {
     return bufferReferences;
   }
-  public void setBufferReferences(int bufferReferences) {
+  public void setBufferReferences(Integer bufferReferences) {
     this.bufferReferences = bufferReferences;
   }
 
@@ -38,10 +38,10 @@ public class Task {
     this.dbCommand = dbCommand;
   }  
 
-  public int getDbid() {
+  public Integer getDbid() {
     return dbid;
   }
-  public void setDbid(int dbid) {
+  public void setDbid(Integer dbid) {
     this.dbid = dbid;
   }
   
@@ -94,17 +94,17 @@ public class Task {
     this.optionalId = optionalId;
   }
 
-  public int getOwnerTask() {
+  public Integer getOwnerTask() {
     return ownerTask;
   }
-  public void setOwnerTask(int ownerTask) {
+  public void setOwnerTask(Integer ownerTask) {
     this.ownerTask = ownerTask;
   }
 
-  public int getPhysicalExcps() {
+  public Integer getPhysicalExcps() {
     return physicalExcps;
   } 
-  public void setPhysicalExcps(int physicalExcps) {
+  public void setPhysicalExcps(Integer physicalExcps) {
     this.physicalExcps = physicalExcps;
   }
 
@@ -115,10 +115,10 @@ public class Task {
      this.runTime = runTime;
   }
   
-  public int getRunUnit() {
+  public Integer getRunUnit() {
     return runUnit;
   }
-  public void setRunUnit(int runUnit) {
+  public void setRunUnit(Integer runUnit) {
     this.runUnit = runUnit;
   }
 
@@ -129,10 +129,10 @@ public class Task {
     this.tableName = tableName;
   }
 
-  public int getTaskNumber() {
+  public Integer getTaskNumber() {
     return taskNumber;
   }
-  public void setTaskNumber(int taskNumber) {
+  public void setTaskNumber(Integer taskNumber) {
     this.taskNumber = taskNumber;
   } 
 
@@ -150,6 +150,48 @@ public class Task {
     this.tsnDuration = tsnDuration;
   } 
 
+  public String getUserPath() {
+    return userPath;
+  }
+  public void setUserPath(String userPath) {
+    this.userPath = userPath;
+  }
+
+  public String getUserJobId() {
+    return userJobId;
+  }
+  public void setUserJobId(String userJobId) {
+    this.userJobId = userJobId;
+  }
+
+  public String getUserRqData() {
+    return userRqData;
+  }
+  public void setUserRqData(String userRqData) {
+    this.userRqData = userRqData;
+  }
+
+  public String getUserSystemName() {
+    return userSystemName;
+  } 
+  public void setUserSystemName(String userSystemName) {
+    this.userSystemName = userSystemName;
+  }
+  
+  public String getWaitDuration() {
+    return waitDuration;
+  }
+  public void setWaitDuration(String waitDuration) {
+    this.waitDuration = waitDuration;
+  }
+
+  public String getWaitTime() {
+    return waitTime;
+  }
+  public void setWaitTime(String waitTime) {
+    this.waitTime = waitTime;
+  }
+
   public String sqlIdStr() {
     return URLEncoder.encode("TASK_NUMBER=" + String.valueOf(taskNumber));  
   } 
@@ -161,35 +203,67 @@ public class Task {
   public Item asItem(String baseURI) {
     Item i = new Item();
     i.setHref(baseURI);
-    i.addDatum(new Datum("BUFFER_REFERENCES", String.valueOf(bufferReferences)));
-    i.addDatum(new Datum("CPU_TIME", cpuTime));
-    i.addDatum(new Datum("CURRENT_STATUS", currentStatus));
-    i.addDatum(new Datum("DB_COMMAND", dbCommand));
-    i.addDatum(new Datum("DBID", String.valueOf(dbid)));
-    i.addDatum(new Datum("DURATION", duration));
-    i.addDatum(new Datum("EOJ_OK", String.valueOf(eojOk)));
-    i.addDatum(new Datum("JOB_NAME", jobName));
-    i.addDatum(new Datum("LOCK_VALUE", lockValue));
-    i.addDatum(new Datum("MUF_NAME", mufName));
-    i.addDatum(new Datum("MUFPLEX_OWNER", mufplexOwner));
-    i.addDatum(new Datum("OPTIONAL_ID", optionalId));
-    i.addDatum(new Datum("OWNER_TASK", String.valueOf(ownerTask)));
-    i.addDatum(new Datum("PHYSICAL_EXCPS", String.valueOf(physicalExcps)));
-    i.addDatum(new Datum("REQUEST_SEQ_NO", String.valueOf(requestSeqNo)));
-    i.addDatum(new Datum("RUN_TIME", runTime));
-    i.addDatum(new Datum("TABLE_NAME", tableName));
-    i.addDatum(new Datum("TASK_NUMBER", String.valueOf(taskNumber)));
-    i.addDatum(new Datum("TRN_SEQ_NO", trnSeqNo));
-    i.addDatum(new Datum("TSN_DURATION", tsnDuration));
+    if (bufferReferences != null) 
+      i.addDatum(new Datum("BUFFER_REFERENCES", String.valueOf(bufferReferences)));
+    if (cpuTime != null) 
+      i.addDatum(new Datum("CPU_TIME", cpuTime));
+    if (currentStatus != null) 
+      i.addDatum(new Datum("CURRENT_STATUS", currentStatus));
+    if (dbCommand != null) 
+      i.addDatum(new Datum("DB_COMMAND", dbCommand));
+    if (dbid != null) 
+      i.addDatum(new Datum("DBID", String.valueOf(dbid)));
+    if (duration != null) 
+      i.addDatum(new Datum("DURATION", duration));
+    if (eojOk != null)
+      i.addDatum(new Datum("EOJ_OK", String.valueOf(eojOk)));
+    if (jobName != null) 
+      i.addDatum(new Datum("JOB_NAME", jobName));
+    if (lockValue != null) 
+      i.addDatum(new Datum("LOCK_VALUE", lockValue));
+    if (mufName != null) 
+      i.addDatum(new Datum("MUF_NAME", mufName));
+    if (mufplexOwner != null) 
+      i.addDatum(new Datum("MUFPLEX_OWNER", mufplexOwner));
+    if (optionalId != null) 
+      i.addDatum(new Datum("OPTIONAL_ID", optionalId));
+    if (ownerTask != null) 
+      i.addDatum(new Datum("OWNER_TASK", String.valueOf(ownerTask)));
+    if (physicalExcps != null) 
+      i.addDatum(new Datum("PHYSICAL_EXCPS", String.valueOf(physicalExcps)));
+    if (requestSeqNo != null) 
+      i.addDatum(new Datum("REQUEST_SEQ_NO", String.valueOf(requestSeqNo)));
+    if (runTime != null) 
+      i.addDatum(new Datum("RUN_TIME", runTime));
+    if (tableName != null) 
+      i.addDatum(new Datum("TABLE_NAME", tableName));
+    if (taskNumber != null) 
+      i.addDatum(new Datum("TASK_NUMBER", String.valueOf(taskNumber)));
+    if (trnSeqNo != null) 
+      i.addDatum(new Datum("TRN_SEQ_NO", trnSeqNo));
+    if (tsnDuration != null) 
+      i.addDatum(new Datum("TSN_DURATION", tsnDuration));
+    if (userPath != null) 
+      i.addDatum(new Datum("USER_PATH", userPath));
+    if (userJobId != null) 
+      i.addDatum(new Datum("USER_JOBID", userJobId));
+    if (userRqData != null) 
+      i.addDatum(new Datum("USER_RQ_DATA", userRqData));
+    if (userSystemName != null) 
+      i.addDatum(new Datum("USER_SYSTEM_NAME", userSystemName));
+    if (waitDuration != null)  
+      i.addDatum(new Datum("WAIT_DURATION", waitDuration));
+    if (waitTime != null) 
+      i.addDatum(new Datum("WAIT_TIME", waitTime));
 
     return i;
   }
 
-  private int bufferReferences;
+  private Integer bufferReferences;
   private String cpuTime;
   private String currentStatus;
   private String dbCommand;
-  private int dbid;
+  private Integer dbid;
   private String duration;
   private Character eojOk;
   private String jobName;
@@ -197,13 +271,19 @@ public class Task {
   private String mufName;
   private String mufplexOwner;
   private String optionalId;
-  private int ownerTask;
-  private int physicalExcps;
-  private int requestSeqNo;
+  private Integer ownerTask;
+  private Integer physicalExcps;
+  private Integer requestSeqNo;
   private String runTime;
-  private int runUnit; 
+  private Integer runUnit; 
   private String tableName;
-  private int taskNumber;
+  private Integer taskNumber;
   private String trnSeqNo;
   private String tsnDuration;
+  private String userPath;
+  private String userJobId;
+  private String userRqData;
+  private String userSystemName;
+  private String waitDuration;
+  private String waitTime;
 }
